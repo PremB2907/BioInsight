@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leukemia SLA Bio-Intelligence Portal</title>
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Chart.js for high-fidelity canvas charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* ----------------- CORE SCI-FI THEME (VANILLA CSS) ----------------- */
+        :root {
+            --bg-color: #030611;
+            --panel-bg: rgba(10, 16, 32, 0.75);
+            --border-neon: rgba(0, 242, 254, 0.25);
+            --border-neon-glow: rgba(0, 242, 254, 0.5);
+            
+            --neon-cyan: #00f2fe;
+            --neon-magenta: #ff007f;
+            --neon-blue: #4facfe;
+            --neon-green: #39ff14;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --glow-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 242, 254, 0.04) 1px, transparent 1px),
+                linear-gradient(rgba(0, 242, 254, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 254, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px, 20px 20px, 20px 20px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* ----------------- LAYOUT ----------------- */
+        /* Sidebar Menu */
+        aside {
+            width: 320px;
+            background: rgba(4, 7, 20, 0.9);
+            border-right: 1px solid var(--border-neon);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-logo {
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px var(--neon-cyan);
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        .brand-text h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-text span {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--neon-magenta);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Navigation Buttons */
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid rgba(0, 242, 254, 0.1);
+            padding: 1rem 1.25rem;
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--neon-cyan);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            color: var(--neon-cyan);
+            border-color: rgba(0, 242, 254, 0.3);
+            background: rgba(0, 242, 254, 0.03);
+            box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.05);
+        }
+
+        .nav-btn.active {
+            color: #fff;
+            border-color: var(--neon-cyan);
+            background: rgba(0, 242, 254, 0.08);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.1), inset 0 0 15px rgba(0, 242, 254, 0.05);
+            text-shadow: 0 0 8px var(--border-neon-glow);
+        }
+
+        .nav-btn.active::before {
+            transform: scaleY(1);
+        }
+
+        /* Sidebar Alerts */
+        .sidebar-alert {
+            margin-top: auto;
+            background: rgba(255, 0, 127, 0.05);
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.03);
+        }
+
+        .sidebar-alert h4 {
+            color: var(--neon-magenta);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-alert p {
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-alert code {
+            display: block;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.4rem;
+            border-radius: 4px;
+            color: #38bdf8;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.7rem;
+            white-space: pre-wrap;
+        }
+
+        /* Main Dashboard Content Area */
+        main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        /* Top Bar Status */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 1rem;
+        }
+
+        .portal-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            font-size: 0.75rem;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(57, 255, 20, 0.05);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            color: var(--neon-green);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--neon-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--neon-green);
+            animation: pulse-dot 1.5s infinite alternate;
+        }
+
+        /* ----------------- DATA COMPONENTS ----------------- */
+        /* Glassmorphic Panel Cards */
+        .cyber-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-neon);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--glow-shadow);
+            position: relative;
+            backdrop-filter: blur(12px);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cyber-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--neon-cyan);
+            border-right: 2px solid var(--neon-cyan);
+        }
+
+        .cyber-card.accent-magenta::after {
+            border-color: var(--neon-magenta);
+        }
+
+        .cyber-card:hover {
+            border-color: var(--border-neon-glow);
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.25);
+        }
+
+        /* Tab Content Panes */
+        .tab-pane {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-pane.active {
+            display: flex;
+        }
+
+        /* Metrics Row */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 1.25rem;
+            position: relative;
+        }
+
+        .metric-card span {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .metric-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-card.neon-glow-cyan h3 {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+        }
+
+        .metric-card.neon-glow-magenta h3 {
+            color: var(--neon-magenta);
+            text-shadow: 0 0 12px rgba(255, 0, 127, 0.4);
+        }
+
+        .metric-card.neon-glow-green h3 {
+            color: var(--neon-green);
+            text-shadow: 0 0 12px rgba(57, 255, 20, 0.4);
+        }
+
+        /* Responsive Dashboard Grids */
+        .dashboard-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .dashboard-grid-2-1 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .dashboard-grid-1-2 {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid-2, .dashboard-grid-2-1, .dashboard-grid-1-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ----------------- DATA VISUALIZATION STYLES ----------------- */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+        }
+
+        /* Interactive Select boxes (Slicers) */
+        .slicer-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: rgba(4, 7, 20, 0.4);
+            border-radius: 6px;
+            padding: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .cyber-select, .cyber-input {
+            width: 100%;
+            background: #060a18;
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            color: var(--text-main);
+            padding: 0.65rem 1rem;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cyber-select:focus, .cyber-input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        .cyber-select[multiple] {
+            height: 110px;
+        }
+
+        /* Slider Controls */
+        .range-slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .cyber-range {
+            -webkit-appearance: none;
+            width: 100%;
+            background: #080d22;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 0.5rem 0;
+        }
+
+        .cyber-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--neon-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-cyan);
+            border: none;
+        }
+
+        /* ----------------- DATA TABLES ----------------- */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(0, 242, 254, 0.05);
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(0, 242, 254, 0.15);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            background: rgba(5, 8, 20, 0.4);
+        }
+
+        tr:hover td {
+            background: rgba(0, 242, 254, 0.02);
+            color: #fff;
+        }
+
+        /* ----------------- SCI-FI INTERACTIVE ELEMENTS ----------------- */
+        /* LCD Readout */
+        .lcd-display {
+            background: #02050f;
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            border-radius: 6px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.1), 0 0 10px rgba(57, 255, 20, 0.05);
+        }
+
+        .lcd-display span {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .lcd-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--neon-green);
+            text-shadow: 0 0 15px rgba(57, 255, 20, 0.6);
+        }
+
+        .lcd-value.error-red {
+            color: var(--neon-magenta);
+            text-shadow: 0 0 15px rgba(255, 0, 127, 0.6);
+        }
+
+        /* Status Grid Box mappings */
+        .cluster-mapping-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Cyber Buttons */
+        .cyber-btn {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(79, 172, 254, 0.1));
+            border: 1px solid var(--neon-cyan);
+            border-radius: 4px;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.1);
+        }
+
+        .cyber-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(79, 172, 254, 0.2));
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+            border-color: #fff;
+        }
+
+        .cyber-btn:active {
+            transform: scale(0.98);
+        }
+
+        .cyber-btn.btn-magenta {
+            border-color: var(--neon-magenta);
+            background: linear-gradient(135deg, rgba(255, 0, 127, 0.1), rgba(255, 0, 127, 0.05));
+            text-shadow: 0 0 8px rgba(255, 0, 127, 0.3);
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.1);
+        }
+
+        .cyber-btn.btn-magenta:hover {
+            background: linear-gradient(135deg, rgba(255, 0, 127, 0.2), rgba(255, 0, 127, 0.1));
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
+        }
+
+        /* ----------------- DRAG AND DROP PIPELINE ----------------- */
+        .dropzone {
+            border: 2px dashed rgba(0, 242, 254, 0.3);
+            border-radius: 8px;
+            background: rgba(6, 10, 24, 0.5);
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--neon-cyan);
+            background: rgba(0, 242, 254, 0.04);
+            box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.05);
+        }
+
+        .dropzone-icon {
+            font-size: 3rem;
+            text-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+            animation: float 3s infinite ease-in-out alternate;
+        }
+
+        .dropzone p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .dropzone span {
+            color: var(--neon-cyan);
+            font-weight: 700;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: #080d22;
+            height: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            box-shadow: 0 0 10px var(--neon-cyan);
+            transition: width 0.4s ease;
+        }
+
+        .progress-status {
+            text-align: center;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            color: var(--neon-cyan);
+            display: none;
+            letter-spacing: 2px;
+        }
+
+        /* ----------------- THEORY / ACCORDION LAYOUT ----------------- */
+        .theory-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .theory-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .theory-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .theory-item h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-left: 3px solid var(--neon-magenta);
+            padding-left: 0.75rem;
+        }
+
+        .theory-item p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+        }
+
+        .theory-item ul {
+            list-style: none;
+            padding-left: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .theory-item li {
+            font-size: 0.85rem;
+            padding: 0.4rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theory-item li::before {
+            content: '➢';
+            color: var(--neon-magenta);
+        }
+
+        /* Custom Box Plot Drawing Canvas */
+        .canvas-container {
+            background: #02050f;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ----------------- ANIMATIONS ----------------- */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 5px var(--neon-cyan)); }
+            50% { filter: drop-shadow(0 0 15px var(--neon-cyan)); }
+        }
+
+        @keyframes pulse-dot {
+            from { transform: scale(1); opacity: 0.6; }
+            to { transform: scale(1.3); opacity: 1; }
+        }
+
+        @keyframes float {
+            from { transform: translateY(0); }
+            to { transform: translateY(-8px); }
+        }
+
+        /* Alert success/error */
+        .cyber-alert {
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            display: none;
+        }
+
+        .cyber-alert.success {
+            background: rgba(57, 255, 20, 0.05);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            color: #d1fae5;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.05);
+        }
+
+        .cyber-alert.error {
+            background: rgba(255, 0, 127, 0.05);
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            color: #ffe4e6;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside>
+        <div class="brand">
+            <div class="brand-logo">🧬</div>
+            <div class="brand-text">
+                <h1>BIO-INTELLIGENCE</h1>
+                <span>SLA PORTAL v4.2.1</span>
+            </div>
+        </div>
+        
+        <nav>
+            <button class="nav-btn active" onclick="switchTab('tab-theory')">ℹ️ SYSTEM THEORY</button>
+            <button class="nav-btn" onclick="switchTab('tab-overview')">📊 EXEC OVERVIEW</button>
+            <button class="nav-btn" onclick="switchTab('tab-gene')">🔍 GENE ANALYSIS</button>
+            <button class="nav-btn" onclick="switchTab('tab-cluster')">🕸️ CLUSTER ANALYSIS</button>
+            <button class="nav-btn" onclick="switchTab('tab-pipeline')">💾 CUSTOM PIPELINE</button>
+        </nav>
+        
+    </aside>
+
+    <!-- MAIN DASHBOARD PANEL -->
+    <main>
+        <header>
+            <div class="portal-header">
+                <h2>LEUKEMIA SLA GENOMIC PLATFORM</h2>
+            </div>
+            <div class="system-status">
+                <div>CORE CPU: NOMINAL</div>
+                <div class="status-pill">
+                    <span class="status-dot"></span>
+                    <span>ONLINE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- NO DATA PRE-LOADED ALERT (Fallback) -->
+        <div id="no-data-alert" class="cyber-card accent-magenta" style="display:none;">
+            <h3>⚠️ CORE DATABASE OFFLINE</h3>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                Could not automatically load precomputed leukemia gene files from the workspace root.
+                Please visit the **Custom Preprocessing Pipeline** tab to upload and initialize the database.
+            </p>
+        </div>
+
+        <!-- ================= TAB 1: SYSTEM THEORY ================= -->
+        <div id="tab-theory" class="tab-pane active">
+            <div class="cyber-card">
+                <div class="theory-section">
+                    <h2 style="font-family:'Orbitron'; font-size:1.4rem; letter-spacing:1px; margin-bottom:1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom:0.5rem;">
+                        SYSTEM BIO-INFORMATICS & DATA MINING WORKFLOW
+                    </h2>
+                    
+                    <div class="theory-row">
+                        <div class="theory-item">
+                            <h3>1. PREPROCESSING & MIN-MAX NORMALIZATION</h3>
+                            <p>
+                                The leukemia dataset represents high-dimensional expression counts of 1,000 genes across 1,000 samples.
+                                To eliminate scaling bias, missing rows are dropped, and columns are normalized to a strict `[0, 1]` index scale:
+                            </p>
+                            <p style="font-family:'Roboto Mono'; text-align:center; font-size: 1.1rem; color: var(--neon-cyan); margin: 0.75rem 0;">
+                                X_norm = (X - X_min) / (X_max - X_min)
+                            </p>
+                            <p>
+                                This mirrors the **WEKA Normalize** unsupervised filter (`scale = 1.0, translate = 0.0`), preventing high-range variance genes from distorting distance coordinates in K-Means.
+                            </p>
+                        </div>
+                        
+                        <div class="theory-item">
+                            <h3>2. FEATURE SELECTION (ANOVA F-SCORE)</h3>
+                            <p>
+                                To solve the *curse of dimensionality* (1,000 genes/dimensions), we use **ANOVA F-score ranking**
+                                (mirroring WEKA's Attribute Selection evaluator with Ranker). This metrics computes:
+                            </p>
+                            <p style="font-family:'Roboto Mono'; text-align:center; font-size: 0.85rem; color: var(--neon-magenta); margin: 0.75rem 0;">
+                                F = (Variance between classes) / (Variance within classes)
+                            </p>
+                            <p>
+                                We rank the genes by F-score and select the top 20 genes that explain the most statistically significant variance between classes (**ALL**, **AML**, and **Healthy**).
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="theory-row">
+                        <div class="theory-item">
+                            <h3>3. UNSUPERVISED CLUSTERING (K-MEANS)</h3>
+                            <p>
+                                The normalized dataset is clustered into $K=3$ partitions using SimpleKMeans (Euclidean distance).
+                                This allows us to observe if unsupervised geometric groupings represent the actual clinical diagnosis labels.
+                            </p>
+                            <p>
+                                **The Cluster Alignment challenge:** Unsupervised models do not know the biological context of the groupings. They label them arbitrarily (e.g. `cluster0`, `cluster1`).
+                                To align them, we run classification accuracies for all $3! = 6$ possible label permutations to discover the optimal cluster mapping.
+                            </p>
+                        </div>
+                        
+                        <div class="theory-item">
+                            <h3>4. ALIGNMENT TO PBIX STRUCTURE</h3>
+                            <p>
+                                This portal serves the exact page panels of the **DMBI SLA.pbix** report:
+                            </p>
+                            <ul>
+                                <li>**Executive Overview**: High-level cohort metrics and diagnosis distributions.</li>
+                                <li>**Gene Analysis**: Micro-view of expression trends using interactive selectors.</li>
+                                <li>**Cluster Analysis**: Partition accuracy evaluators.</li>
+                                <li>**Custom Pipeline**: Ad-hoc dataset uploader and processing.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: EXEC OVERVIEW ================= -->
+        <div id="tab-overview" class="tab-pane">
+            <!-- Metric Cards -->
+            <div class="metrics-row">
+                <div class="cyber-card metric-card neon-glow-cyan">
+                    <span>Total Patients</span>
+                    <h3 id="stat-samples">-</h3>
+                </div>
+                <div class="cyber-card metric-card neon-glow-magenta">
+                    <span>Total Gene Probes</span>
+                    <h3 id="stat-genes">-</h3>
+                </div>
+                <div class="cyber-card metric-card neon-glow-green">
+                    <span>Leukemia Cases</span>
+                    <h3 id="stat-leukemia">-</h3>
+                </div>
+                <div class="cyber-card metric-card">
+                    <span>Control Groups</span>
+                    <h3 id="stat-healthy">-</h3>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="dashboard-grid-2-1">
+                <div class="cyber-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase;">🧬 Gene Expression Distribution (Box-Plot)</h3>
+                        <div>
+                            <select id="overview-gene-select" class="cyber-select" onchange="loadBoxPlot()" style="width: 180px;">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Custom HTML Canvas BoxPlot -->
+                    <div class="canvas-container" style="height: 300px;">
+                        <canvas id="boxplotCanvas" width="550" height="280"></canvas>
+                    </div>
+                </div>
+                
+                <div class="cyber-card">
+                    <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">📊 Case Distribution</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="overviewPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matrix -->
+            <div class="cyber-card">
+                <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">📋 Genomic Expression Matrix Preview (Ranked Features)</h3>
+                <div class="table-responsive">
+                    <table id="overview-matrix-table">
+                        <thead>
+                            <tr id="overview-matrix-head">
+                                <!-- Populated dynamically -->
+                            </tr>
+                        </thead>
+                        <tbody id="overview-matrix-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: GENE ANALYSIS ================= -->
+        <div id="tab-gene" class="tab-pane">
+            <div class="dashboard-grid-1-2">
+                <!-- Slicers -->
+                <div class="cyber-card">
+                    <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">🎛️ Gene Profile Slicers</h3>
+                    
+                    <div class="slicer-container">
+                        <div class="form-group">
+                            <label for="gene-selector">Ranked Gene Probes</label>
+                            <select id="gene-selector" class="cyber-select" multiple onchange="updateGeneAnalysis()">
+                                <!-- Populated dynamically -->
+                            </select>
+                            <span style="font-size:0.65rem; color:var(--text-muted); margin-top:0.25rem;">(Hold Ctrl/Cmd to select up to 5)</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Diagnosis Filtering</label>
+                            <div style="display:flex; gap:1rem; margin-top:0.5rem; font-family:'Roboto Mono', monospace; font-size:0.8rem;">
+                                <label style="display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
+                                    <input type="checkbox" id="chk-all" checked onchange="updateGeneAnalysis()"> ALL
+                                </label>
+                                <label style="display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
+                                    <input type="checkbox" id="chk-aml" checked onchange="updateGeneAnalysis()"> AML
+                                </label>
+                                <label style="display:flex; align-items:center; gap:0.25rem; cursor:pointer;">
+                                    <input type="checkbox" id="chk-healthy" checked onchange="updateGeneAnalysis()"> HEALTHY
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="range-slider-label">
+                                <span>SAMPLE WINDOW</span>
+                                <span id="lbl-sample-range">1 - 100</span>
+                            </div>
+                            <input type="range" id="slider-range-start" class="cyber-range" min="1" max="1000" value="1" oninput="slideRangeUpdate()">
+                            <input type="range" id="slider-range-end" class="cyber-range" min="1" max="1000" value="100" oninput="slideRangeUpdate()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Line Chart -->
+                <div class="cyber-card">
+                    <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">📈 Expression Profile Scan</h3>
+                    <div class="chart-container" style="height: 380px;">
+                        <canvas id="geneLineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats table -->
+            <div class="cyber-card">
+                <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">🔬 Selected Gene Summary Metrics</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>GENE</th>
+                                <th>DIAGNOSIS</th>
+                                <th>MEAN EXPRESSION</th>
+                                <th>STD DEV</th>
+                                <th>MIN</th>
+                                <th>MAX</th>
+                                <th>OBSERVATIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gene-metrics-body">
+                            <tr><td colspan="7" style="text-align:center;">Select genes in the sidebar selector.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: CLUSTER ANALYSIS ================= -->
+        <div id="tab-cluster" class="tab-pane">
+            <div class="dashboard-grid-2">
+                <!-- Crosstab Table -->
+                <div class="cyber-card">
+                    <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">🕸️ Unsupervised Cluster-Diagnosis Crosstab</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>DIAGNOSIS (WEKA)</th>
+                                    <th>CLUSTER 0</th>
+                                    <th>CLUSTER 1</th>
+                                    <th>CLUSTER 2</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crosstab-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 4px; border: 1px dashed rgba(255,255,255,0.05);">
+                        <p style="font-size: 0.8rem; line-height: 1.5; color: var(--text-muted);">
+                            <strong>K-Means clustering:</strong> The normalized dataset (1000 features) was clustered into K=3 components using SimpleKMeans. The crosstab reveals clustering densities for diagnosis classes.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Matcher -->
+                <div class="cyber-card">
+                    <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">⚙️ Cluster Alignment Permutator</h3>
+                    
+                    <div class="cluster-mapping-grid">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1rem;">
+                            <div class="form-group">
+                                <label>cluster0 maps to:</label>
+                                <select id="map-cluster0" class="cyber-select" onchange="evaluatePermutationMapping()">
+                                    <option value="ALL">ALL</option>
+                                    <option value="AML" selected>AML</option>
+                                    <option value="Healthy">Healthy</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>cluster1 maps to:</label>
+                                <select id="map-cluster1" class="cyber-select" onchange="evaluatePermutationMapping()">
+                                    <option value="ALL">ALL</option>
+                                    <option value="AML">AML</option>
+                                    <option value="Healthy" selected>Healthy</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>cluster2 maps to:</label>
+                                <select id="map-cluster2" class="cyber-select" onchange="evaluatePermutationMapping()">
+                                    <option value="ALL" selected>ALL</option>
+                                    <option value="AML">AML</option>
+                                    <option value="Healthy">Healthy</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- LCD Output -->
+                        <div class="lcd-display">
+                            <span>Mapping Alignment Accuracy</span>
+                            <div id="lcd-accuracy" class="lcd-value">75.20%</div>
+                        </div>
+
+                        <!-- Alerts -->
+                        <div id="mapping-alert-success" class="cyber-alert success">
+                            <strong>🎉 OPTIMAL MAPPING SECURED!</strong> Mapping cluster0 ➔ AML, cluster1 ➔ Healthy, cluster2 ➔ ALL yields 75.20% accuracy (matching WEKA standard alignments).
+                        </div>
+                        <div id="mapping-alert-invalid" class="cyber-alert error">
+                            <strong>⚠️ SYSTEM ERROR: MAPPING INCONSISTENT!</strong> Each cluster label must point to a unique diagnosis class to evaluate accuracy.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accuracy Grid -->
+            <div class="cyber-card">
+                <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">📊 Accuracy Space (All 6 Mappings)</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>MAPPING: CLUSTER 0</th>
+                                <th>MAPPING: CLUSTER 1</th>
+                                <th>MAPPING: CLUSTER 2</th>
+                                <th>ALIGNMENT CLASSIFICATION ACCURACY</th>
+                            </tr>
+                        </thead>
+                        <tbody id="perm-grid-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: CUSTOM PREPROCESSING PIPELINE ================= -->
+        <div id="tab-pipeline" class="tab-pane">
+            <div class="cyber-card">
+                <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">💾 Bio-Intelligence Preprocessing Engine</h3>
+                <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1.5rem;">
+                    Upload a custom leukemia dataset (CSV or ARFF) to execute normalization, select the top 20 genes using ANOVA, perform K-Means clustering, and download processed matrices.
+                </p>
+
+                <!-- Dropzone -->
+                <div class="dropzone" id="file-dropzone" onclick="document.getElementById('file-input').click()">
+                    <div class="dropzone-icon">📥</div>
+                    <p>Drag and drop a <span>CSV</span> or <span>ARFF</span> file here or <span>click to browse</span></p>
+                    <input type="file" id="file-input" style="display:none;" accept=".csv,.arff" onchange="handleFileSelect(event)">
+                </div>
+
+                <!-- Progress indicators -->
+                <div class="progress-container" id="upload-progress">
+                    <div class="progress-bar" id="upload-progress-bar"></div>
+                </div>
+                <div class="progress-status" id="upload-progress-status">COMPUTING GENOMIC PROFILES...</div>
+
+                <div id="pipeline-results" style="display:none; margin-top:2rem;">
+                    <h2 style="font-family:'Orbitron'; font-size:1.1rem; color:var(--neon-green); margin-bottom:1rem;">✔️ PIPELINE COMPUTATION COMPLETED</h2>
+                    
+                    <div class="metrics-row" style="margin-bottom:1.5rem;">
+                        <div class="cyber-card metric-card" style="padding:1rem;">
+                            <span style="font-size:0.65rem;">Processed Samples</span>
+                            <h3 id="pipe-samples" style="font-size:1.6rem;">-</h3>
+                        </div>
+                        <div class="cyber-card metric-card" style="padding:1rem;">
+                            <span style="font-size:0.65rem;">Genes Filtered</span>
+                            <h3 id="pipe-genes" style="font-size:1.6rem;">-</h3>
+                        </div>
+                        <div class="cyber-card metric-card" style="padding:1rem;">
+                            <span style="font-size:0.65rem;">Dropped Null Rows</span>
+                            <h3 id="pipe-dropped" style="font-size:1.6rem;">-</h3>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:1rem; margin-bottom:2rem;">
+                        <button class="cyber-btn" onclick="downloadCSV('cleaned')">📥 Cleaned Dataset CSV</button>
+                        <button class="cyber-btn" onclick="downloadCSV('top20')">📥 Top 20 Genes CSV</button>
+                        <button class="cyber-btn btn-magenta" onclick="downloadCSV('clusters')">📥 Cluster Assignments CSV</button>
+                    </div>
+
+                    <h3 style="font-family:'Orbitron'; font-size:1rem; text-transform:uppercase; margin-bottom:1rem;">🔬 Preprocessed Sample Output</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr id="pipe-matrix-head"></tr>
+                            </thead>
+                            <tbody id="pipe-matrix-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ----------------- CLIENT JAVASCRIPT ----------------- -->
+    <script>
+        // Global variables for caching
+        let dbStats = null;
+        let selectedGeneData = null;
+        let lineChartInstance = null;
+        let pieChartInstance = null;
+        let currentUploadedData = null; // Storing temporary uploads
+        
+        // Start init
+        window.addEventListener("DOMContentLoaded", () => {
+            fetchStats();
+        });
+
+        // Tab routing
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.remove("active"));
+            document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+            
+            document.getElementById(tabId).classList.add("active");
+            
+            // Highlight button
+            const activeBtn = Array.from(document.querySelectorAll(".nav-btn")).find(btn => btn.getAttribute("onclick").includes(tabId));
+            if (activeBtn) activeBtn.classList.add("active");
+            
+            // Re-render chart adjustments if needed
+            if (tabId === 'tab-overview' && dbStats) {
+                renderOverviewCharts();
+            } else if (tabId === 'tab-gene') {
+                updateGeneAnalysis();
+            }
+        }
+
+        // Fetch Main Statistics from API
+        function fetchStats() {
+            fetch("/api/stats")
+                .then(res => {
+                    if (!res.ok) throw new Error("Local databases missing");
+                    return res.json();
+                })
+                .then(data => {
+                    dbStats = data;
+                    document.getElementById("no-data-alert").style.display = "none";
+                    
+                    // Set stats metrics
+                    document.getElementById("stat-samples").innerText = data.total_samples;
+                    document.getElementById("stat-genes").innerText = data.total_genes;
+                    
+                    const caseCounts = data.diagnosis_counts;
+                    const leukemia = (caseCounts.ALL || 0) + (caseCounts.AML || 0);
+                    document.getElementById("stat-leukemia").innerText = leukemia;
+                    document.getElementById("stat-healthy").innerText = caseCounts.Healthy || 0;
+                    
+                    // Fill gene selectors
+                    populateGeneSelectors(data.top20_genes);
+                    
+                    // Fill crosstab
+                    populateCrosstab(data.crosstab);
+                    
+                    // Evaluate default mappings
+                    evaluatePermutationMapping();
+                    
+                    // Generate grid of all 6 permutations
+                    populatePermGrid();
+                    
+                    // Render Matrix preview
+                    renderMatrixPreview();
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById("no-data-alert").style.display = "block";
+                });
+        }
+
+        function populateGeneSelectors(genes) {
+            const overviewSelect = document.getElementById("overview-gene-select");
+            const geneSelect = document.getElementById("gene-selector");
+            
+            overviewSelect.innerHTML = "";
+            geneSelect.innerHTML = "";
+            
+            genes.forEach((gene, i) => {
+                const opt = document.createElement("option");
+                opt.value = gene;
+                opt.text = gene;
+                overviewSelect.appendChild(opt);
+                
+                const opt2 = document.createElement("option");
+                opt2.value = gene;
+                opt2.text = gene;
+                if (i < 3) opt2.selected = true; // select first 3 by default
+                geneSelect.appendChild(opt2);
+            });
+            
+            // Trigger first boxplot
+            loadBoxPlot();
+        }
+
+        function populateCrosstab(ct) {
+            const body = document.getElementById("crosstab-body");
+            body.innerHTML = "";
+            
+            const rows = ["ALL", "AML", "Healthy"];
+            rows.forEach(diag => {
+                const tr = document.createElement("tr");
+                const thDiag = document.createElement("td");
+                thDiag.style.fontWeight = "bold";
+                thDiag.innerText = diag;
+                tr.appendChild(thDiag);
+                
+                ["cluster0", "cluster1", "cluster2"].forEach(cluster => {
+                    const td = document.createElement("td");
+                    td.innerText = ct[diag] ? (ct[diag][cluster] || 0) : 0;
+                    tr.appendChild(td);
+                });
+                body.appendChild(tr);
+            });
+        }
+
+        // Render Matrix Preview in Overview Tab
+        function renderMatrixPreview() {
+            // Fetch first gene stats to extract index numbers
+            const defaultGene = dbStats.top20_genes[0];
+            fetch(`/api/gene-stats/${defaultGene}`)
+                .then(res => res.json())
+                .then(geneRes => {
+                    const exprs = geneRes.expressions.slice(0, 10);
+                    
+                    // Populate head
+                    const head = document.getElementById("overview-matrix-head");
+                    head.innerHTML = "<th>SAMPLE ID</th>";
+                    dbStats.top20_genes.slice(0, 8).forEach(gene => {
+                        const th = document.createElement("th");
+                        th.innerText = gene;
+                        head.appendChild(th);
+                    });
+                    const thDiag = document.createElement("th");
+                    thDiag.innerText = "DIAGNOSIS";
+                    head.appendChild(thDiag);
+                    
+                    // Fetch other genes for matrix
+                    const promises = dbStats.top20_genes.slice(0, 8).map(gene => 
+                        fetch(`/api/gene-stats/${gene}`).then(r => r.json())
+                    );
+                    
+                    Promise.all(promises).then(allGenesData => {
+                        const body = document.getElementById("overview-matrix-body");
+                        body.innerHTML = "";
+                        
+                        for (let s = 0; s < 10; s++) {
+                            const tr = document.createElement("tr");
+                            const tdId = document.createElement("td");
+                            tdId.innerText = allGenesData[0].expressions[s].sample_index;
+                            tr.appendChild(tdId);
+                            
+                            allGenesData.forEach(geneObj => {
+                                const tdVal = document.createElement("td");
+                                tdVal.innerText = geneObj.expressions[s].expression.toFixed(4);
+                                tr.appendChild(tdVal);
+                            });
+                            
+                            const tdDiag = document.createElement("td");
+                            tdDiag.innerText = allGenesData[0].expressions[s].diagnosis;
+                            tdDiag.style.fontWeight = "bold";
+                            tr.appendChild(tdDiag);
+                            
+                            body.appendChild(tr);
+                        }
+                    });
+                });
+        }
+
+        // Evaluate Dynamic Permutations locally
+        function evaluatePermutationMapping() {
+            if (!dbStats) return;
+            
+            const map0 = document.getElementById("map-cluster0").value;
+            const map1 = document.getElementById("map-cluster1").value;
+            const map2 = document.getElementById("map-cluster2").value;
+            
+            const mappings = { "cluster0": map0, "cluster1": map1, "cluster2": map2 };
+            
+            // Check duplicates
+            const mappedValues = Object.values(mappings);
+            const isUnique = new Set(mappedValues).size === 3;
+            
+            const lcd = document.getElementById("lcd-accuracy");
+            const alertSuccess = document.getElementById("mapping-alert-success");
+            const alertInvalid = document.getElementById("mapping-alert-invalid");
+            
+            if (!isUnique) {
+                lcd.innerText = "ERROR";
+                lcd.className = "lcd-value error-red";
+                alertSuccess.style.display = "none";
+                alertInvalid.style.display = "block";
+                return;
+            }
+            
+            alertInvalid.style.display = "none";
+            
+            // Calculate accuracy
+            const assignments = dbStats.cluster_assignments;
+            let correct = 0;
+            assignments.forEach(row => {
+                if (mappings[row.Cluster] === row.Diagnosis) {
+                    correct++;
+                }
+            });
+            
+            const accuracy = (correct / assignments.length) * 100;
+            lcd.innerText = accuracy.toFixed(2) + "%";
+            lcd.className = "lcd-value";
+            
+            if (accuracy >= 75.0) {
+                alertSuccess.style.display = "block";
+            } else {
+                alertSuccess.style.display = "none";
+            }
+        }
+
+        // Render accuracy permutations table grid
+        function populatePermGrid() {
+            const body = document.getElementById("perm-grid-body");
+            body.innerHTML = "";
+            
+            const allDiagnoses = ["ALL", "AML", "Healthy"];
+            const allClusters = ["cluster0", "cluster1", "cluster2"];
+            
+            // Helper to get permutations
+            function permute(arr) {
+                let res = [];
+                const solve = (temp) => {
+                    if (temp.length === arr.length) {
+                        res.push([...temp]);
+                        return;
+                    }
+                    for (let i = 0; i < arr.length; i++) {
+                        if (temp.includes(arr[i])) continue;
+                        temp.push(arr[i]);
+                        solve(temp);
+                        temp.pop();
+                    }
+                }
+                solve([]);
+                return res;
+            }
+            
+            const perms = permute(allDiagnoses);
+            const gridData = [];
+            
+            perms.forEach(p => {
+                const mapping = { "cluster0": p[0], "cluster1": p[1], "cluster2": p[2] };
+                let correct = 0;
+                dbStats.cluster_assignments.forEach(row => {
+                    if (mapping[row.Cluster] === row.Diagnosis) correct++;
+                });
+                const acc = (correct / dbStats.cluster_assignments.length) * 100;
+                gridData.push({
+                    c0: p[0], c1: p[1], c2: p[2], acc: acc
+                });
+            });
+            
+            // Sort by accuracy descending
+            gridData.sort((a, b) => b.acc - a.acc);
+            
+            gridData.forEach(row => {
+                const tr = document.createElement("tr");
+                if (row.acc >= 75.0) tr.style.border = "1px solid var(--neon-green)";
+                
+                const t0 = document.createElement("td"); t0.innerText = row.c0; tr.appendChild(t0);
+                const t1 = document.createElement("td"); t1.innerText = row.c1; tr.appendChild(t1);
+                const t2 = document.createElement("td"); t2.innerText = row.c2; tr.appendChild(t2);
+                
+                const tAcc = document.createElement("td");
+                tAcc.style.fontWeight = "bold";
+                tAcc.style.color = row.acc >= 75.0 ? "var(--neon-green)" : "var(--text-main)";
+                tAcc.innerText = row.acc.toFixed(2) + "%";
+                tr.appendChild(tAcc);
+                
+                body.appendChild(tr);
+            });
+        }
+
+        // Render Charts in Tab 2
+        function renderOverviewCharts() {
+            const diagCounts = dbStats.diagnosis_counts;
+            
+            // Pie Donut Chart
+            const ctxPie = document.getElementById("overviewPieChart").getContext("2d");
+            if (pieChartInstance) pieChartInstance.destroy();
+            
+            pieChartInstance = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(diagCounts),
+                    datasets: [{
+                        data: Object.values(diagCounts),
+                        backgroundColor: ['#ff007f', '#00f2fe', '#39ff14'],
+                        borderWidth: 1,
+                        borderColor: '#060a18'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8',
+                                font: { family: 'Orbitron', size: 10 }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        // Custom HTML Canvas Boxplot drawing function
+        function loadBoxPlot() {
+            const gene = document.getElementById("overview-gene-select").value;
+            if (!gene) return;
+            
+            fetch(`/api/gene-stats/${gene}`)
+                .then(res => res.json())
+                .then(data => {
+                    drawBoxPlotOnCanvas("boxplotCanvas", data.stats);
+                });
+        }
+
+        function drawBoxPlotOnCanvas(canvasId, stats) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const diagnoses = ["ALL", "AML", "Healthy"];
+            const colors = {
+                "ALL": "#ff007f",
+                "AML": "#00f2fe",
+                "Healthy": "#39ff14"
+            };
+            
+            // Draw grid lines
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = 30 + i * 50;
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(500, y);
+                ctx.stroke();
+                
+                // Labels y (normalized expressions [0.0 to 1.0])
+                ctx.fillStyle = "#94a3b8";
+                ctx.font = "10px Roboto Mono";
+                const val = (1.0 - i * 0.25).toFixed(2);
+                ctx.fillText(val, 15, y + 4);
+            }
+            
+            // Draw vertical axis line
+            ctx.strokeStyle = "rgba(0, 242, 254, 0.2)";
+            ctx.beginPath();
+            ctx.moveTo(50, 30);
+            ctx.lineTo(50, 230);
+            ctx.stroke();
+            
+            // Plot box ranges
+            diagnoses.forEach((diag, index) => {
+                const dStats = stats[diag];
+                if (!dStats) return;
+                
+                const x = 120 + index * 140;
+                
+                // Convert min-max normalized values to canvas coordinates
+                // Canvas coordinates range from y=230 (value 0.0) to y=30 (value 1.0)
+                const valToY = (val) => 230 - (val * 200);
+                
+                const yMin = valToY(dStats.min);
+                const yMax = valToY(dStats.max);
+                const yMean = valToY(dStats.mean);
+                
+                // Let's approximate std range (mean +/- std)
+                const stdUpper = Math.min(1.0, dStats.mean + dStats.std);
+                const stdLower = Math.max(0.0, dStats.mean - dStats.std);
+                
+                const yStdUpper = valToY(stdUpper);
+                const yStdLower = valToY(stdLower);
+                
+                // Draw vertical range line (Min to Max)
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x, yMin);
+                ctx.lineTo(x, yMax);
+                ctx.stroke();
+                
+                // Draw horizontal ticks for min/max
+                ctx.beginPath();
+                ctx.moveTo(x - 8, yMin); ctx.lineTo(x + 8, yMin);
+                ctx.moveTo(x - 8, yMax); ctx.lineTo(x + 8, yMax);
+                ctx.stroke();
+                
+                // Draw standard deviation box (glowing effect)
+                ctx.fillStyle = colors[diag];
+                ctx.globalAlpha = 0.45;
+                ctx.fillRect(x - 22, yStdUpper, 44, yStdLower - yStdUpper);
+                
+                ctx.strokeStyle = colors[diag];
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 1.0;
+                ctx.strokeRect(x - 22, yStdUpper, 44, yStdLower - yStdUpper);
+                
+                // Draw mean line (Accent line)
+                ctx.strokeStyle = "#ffffff";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x - 22, yMean);
+                ctx.lineTo(x + 22, yMean);
+                ctx.stroke();
+                
+                // Draw diagnosis label
+                ctx.fillStyle = "#e2e8f0";
+                ctx.font = "bold 11px Orbitron";
+                ctx.textAlign = "center";
+                ctx.fillText(diag, x, 255);
+            });
+            ctx.textAlign = "left";
+        }
+
+        // Slider logic
+        function slideRangeUpdate() {
+            const start = parseInt(document.getElementById("slider-range-start").value);
+            const end = parseInt(document.getElementById("slider-range-end").value);
+            
+            if (start >= end) {
+                document.getElementById("slider-range-start").value = end - 5;
+            }
+            
+            document.getElementById("lbl-sample-range").innerText = `${document.getElementById("slider-range-start").value} - ${document.getElementById("slider-range-end").value}`;
+            updateGeneAnalysis();
+        }
+
+        // Gene profiles charts (Tab 3)
+        function updateGeneAnalysis() {
+            if (!dbStats) return;
+            
+            const selectElement = document.getElementById("gene-selector");
+            const selectedGenes = Array.from(selectElement.selectedOptions).map(opt => opt.value);
+            
+            if (selectedGenes.length === 0) {
+                document.getElementById("gene-metrics-body").innerHTML = '<tr><td colspan="7" style="text-align:center;">Select at least one gene in the list.</td></tr>';
+                return;
+            }
+            
+            const allChecked = document.getElementById("chk-all").checked;
+            const amlChecked = document.getElementById("chk-aml").checked;
+            const healthyChecked = document.getElementById("chk-healthy").checked;
+            
+            const allowedDiags = [];
+            if (allChecked) allowedDiags.push("ALL");
+            if (amlChecked) allowedDiags.push("AML");
+            if (healthyChecked) allowedDiags.push("Healthy");
+            
+            const startRange = parseInt(document.getElementById("slider-range-start").value);
+            const endRange = parseInt(document.getElementById("slider-range-end").value);
+            
+            // Batch fetch stats for table and expressions for charts
+            const statsPromises = selectedGenes.map(gene => 
+                fetch(`/api/gene-stats/${gene}`).then(r => r.json())
+            );
+            
+            Promise.all(statsPromises).then(results => {
+                // Populate Table Metrics
+                const body = document.getElementById("gene-metrics-body");
+                body.innerHTML = "";
+                
+                results.forEach(res => {
+                    allowedDiags.forEach(diag => {
+                        const dStats = res.stats[diag];
+                        if (!dStats) return;
+                        
+                        const tr = document.createElement("tr");
+                        const tdGene = document.createElement("td"); tdGene.style.fontWeight = "bold"; tdGene.innerText = res.gene; tr.appendChild(tdGene);
+                        const tdDiag = document.createElement("td"); tdDiag.innerText = diag; tr.appendChild(tdDiag);
+                        const tdMean = document.createElement("td"); tdMean.innerText = dStats.mean.toFixed(5); tr.appendChild(tdMean);
+                        const tdStd = document.createElement("td"); tdStd.innerText = dStats.std.toFixed(5); tr.appendChild(tdStd);
+                        const tdMin = document.createElement("td"); tdMin.innerText = dStats.min.toFixed(5); tr.appendChild(tdMin);
+                        const tdMax = document.createElement("td"); tdMax.innerText = dStats.max.toFixed(5); tr.appendChild(tdMax);
+                        const tdCount = document.createElement("td"); tdCount.innerText = dStats.count; tr.appendChild(tdCount);
+                        
+                        body.appendChild(tr);
+                    });
+                });
+                
+                // Plot Chart.js Line Chart
+                const ctxLine = document.getElementById("geneLineChart").getContext("2d");
+                if (lineChartInstance) lineChartInstance.destroy();
+                
+                // Prepare datasets
+                const colors = ['#00f2fe', '#ff007f', '#39ff14', '#a855f7', '#eab308'];
+                const datasets = results.map((res, i) => {
+                    // Filter expressions by diagnosis and index range
+                    const filteredExpr = res.expressions.filter(expr => 
+                        allowedDiags.includes(expr.diagnosis) && 
+                        expr.sample_index >= startRange && 
+                        expr.sample_index <= endRange
+                    );
+                    
+                    return {
+                        label: res.gene,
+                        data: filteredExpr.map(expr => expr.expression),
+                        borderColor: colors[i % colors.length],
+                        backgroundColor: colors[i % colors.length] + "10",
+                        fill: true,
+                        borderWidth: 1.5,
+                        tension: 0.15,
+                        pointRadius: 1.5
+                    };
+                });
+                
+                // Generate labels
+                const sampleLabels = results[0].expressions.filter(expr => 
+                    allowedDiags.includes(expr.diagnosis) && 
+                    expr.sample_index >= startRange && 
+                    expr.sample_index <= endRange
+                ).map(expr => `S-${expr.sample_index} (${expr.diagnosis})`);
+                
+                lineChartInstance = new Chart(ctxLine, {
+                    type: 'line',
+                    data: {
+                        labels: sampleLabels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#94a3b8',
+                                    font: { family: 'Orbitron', size: 9 }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#64748b', maxTicksLimit: 15, font: { family: 'Roboto Mono', size: 9 } },
+                                grid: { color: 'rgba(255,255,255,0.02)' }
+                            },
+                            y: {
+                                ticks: { color: '#94a3b8', font: { family: 'Roboto Mono', size: 9 } },
+                                grid: { color: 'rgba(0, 242, 254, 0.05)' }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Preprocessing Pipeline uploader (Tab 5)
+        function handleFileSelect(evt) {
+            const files = evt.target.files;
+            if (files.length > 0) {
+                uploadAndProcessFile(files[0]);
+            }
+        }
+
+        // Drag and drop events
+        const dropzone = document.getElementById("file-dropzone");
+        dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("dragover"); });
+        dropzone.addEventListener("dragleave", () => { dropzone.classList.remove("dragover"); });
+        dropzone.addEventListener("drop", e => {
+            e.preventDefault();
+            dropzone.classList.remove("dragover");
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadAndProcessFile(files[0]);
+            }
+        });
+
+        function uploadAndProcessFile(file) {
+            const formData = new FormData();
+            formData.append("file", file);
+            
+            // Show loaders
+            document.getElementById("upload-progress").style.display = "block";
+            const bar = document.getElementById("upload-progress-bar");
+            const status = document.getElementById("upload-progress-status");
+            status.style.display = "block";
+            
+            bar.style.width = "20%";
+            status.innerText = "INITIALIZING UPLOAD SYSTEM...";
+            
+            setTimeout(() => { bar.style.width = "50%"; status.innerText = "PARSING GENOMIC DATA MATRIX..."; }, 600);
+            setTimeout(() => { bar.style.width = "80%"; status.innerText = "COMPUTING ANOVA ATTRIBUTES & K-MEANS..."; }, 1200);
+            
+            fetch("/api/process", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                
+                bar.style.width = "100%";
+                status.innerText = "PIPELINE RESOLVED NOMINALLY!";
+                
+                // Cache pipeline data for CSV downloads
+                currentUploadedData = data;
+                
+                setTimeout(() => {
+                    document.getElementById("upload-progress").style.display = "none";
+                    status.style.display = "none";
+                    
+                    document.getElementById("pipeline-results").style.display = "block";
+                    document.getElementById("pipe-samples").innerText = data.summary.samples;
+                    document.getElementById("pipe-genes").innerText = data.summary.genes;
+                    document.getElementById("pipe-dropped").innerText = data.summary.rows_dropped;
+                    
+                    // Render sample table head
+                    const head = document.getElementById("pipe-matrix-head");
+                    head.innerHTML = "<th>SAMPLE ID</th>";
+                    data.selected_genes.slice(0, 8).forEach(g => {
+                        const th = document.createElement("th");
+                        th.innerText = g;
+                        head.appendChild(th);
+                    });
+                    const thDiag = document.createElement("th"); thDiag.innerText = "DIAGNOSIS"; head.appendChild(thDiag);
+                    
+                    // Render sample table body
+                    const body = document.getElementById("pipe-matrix-body");
+                    body.innerHTML = "";
+                    data.cleaned_sample.slice(0, 8).forEach((row, i) => {
+                        const tr = document.createElement("tr");
+                        const tdId = document.createElement("td"); tdId.innerText = i + 1; tr.appendChild(tdId);
+                        
+                        data.selected_genes.slice(0, 8).forEach(g => {
+                            const tdVal = document.createElement("td");
+                            tdVal.innerText = row[g] ? row[g].toFixed(4) : "0.0000";
+                            tr.appendChild(tdVal);
+                        });
+                        
+                        const tdDiag = document.createElement("td");
+                        tdDiag.style.fontWeight = "bold";
+                        tdDiag.innerText = row[data.summary.label_column] || "Unknown";
+                        tr.appendChild(tdDiag);
+                        body.appendChild(tr);
+                    });
+                    
+                }, 1600);
+            })
+            .catch(err => {
+                bar.style.width = "0%";
+                status.innerText = `FATAL RUNTIME ERROR: ${err.message}`;
+                console.error(err);
+            });
+        }
+
+        // Dynamic CSV exports in JS via Blobs
+        function downloadCSV(type) {
+            let csvContent = "";
+            let filename = "";
+            
+            if (currentUploadedData) {
+                // Download from currently processed upload
+                if (type === 'cleaned') {
+                    csvContent = currentUploadedData.csv_cleaned;
+                    filename = "preprocessed_dataset.csv";
+                } else if (type === 'top20') {
+                    csvContent = currentUploadedData.csv_top20;
+                    filename = "ranked_top20_genes.csv";
+                } else if (type === 'clusters') {
+                    csvContent = currentUploadedData.csv_clusters;
+                    filename = "kmeans_cluster_assignments.csv";
+                }
+            } else {
+                alert("Please process a dataset first using the drag-and-drop zone.");
+                return;
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+</body>
+</html>

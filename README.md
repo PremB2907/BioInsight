@@ -1,121 +1,82 @@
-# Leukemia Gene Expression Analytics Dashboard
+# 🧬 Leukemia Bio-Intelligence SLA Dashboard
 
-An interactive Power BI dashboard analyzing gene expression data across Acute Myeloid Leukemia (AML), Acute Lymphoblastic Leukemia (ALL), and Healthy control samples, combined with unsupervised clustering (K-Means via WEKA) and association rule mining to uncover patterns across a 20-gene expression panel.
+An interactive, high-fidelity web application built with **Flask + Vanilla HTML/CSS/JS** and **Chart.js** to preprocess, select, and cluster leukemia gene expression profiles. This portal mirrors the exact analytical pages and layout logic of the Power BI report (`DMBI SLA.pbix`) and aligns with the WEKA data mining algorithms.
 
-## Overview
+---
 
-This project explores whether gene expression profiles can meaningfully distinguish between AML, ALL, and healthy samples. It combines exploratory data analysis, feature selection, unsupervised clustering, and association rule mining, with results visualized in a 4-page interactive Power BI dashboard.
+## 🚀 Key Features
 
-## Dataset
+* **Advanced Normalization (WEKA SimpleKMeans standard)**: Cleans datasets of missing rows and executes Min-Max Normalization to scale expression levels strictly between `[0, 1]`.
+* **ANOVA F-Score Attribute Selector**: Reduces dimensionality from 1,000 genes to the top 20 genes explaining the highest statistical variance between classes.
+* **Interactive Permutation Matcher**: Evaluates unsupervised cluster geometries against clinical labels in real-time, displaying accuracy readouts for all $3! = 6$ possible mappings.
+* **Biometric Boxplots & Gene Profiles**: Features a custom HTML5 canvas boxplot renderer displaying standard deviations and mean lines, alongside interactive line charts of patient scans.
+* **Drag-and-Drop Preprocessing Pipeline**: Upload custom CSV/ARFF datasets on-the-fly, run the extraction pipeline, and export the processed datasets immediately.
 
-- **Source:** [Leukemia Gene Expression Dataset (Kaggle)](https://www.kaggle.com/datasets/ziya07/gene-expression-dataset)
-- **Samples:** 1,000 patient samples
-- **Features:** 1,000 gene expression attributes (reduced to top 20 via feature selection)
-- **Classes:**
-  - AML — 409 samples (40.9%)
-  - ALL — 380 samples (38%)
-  - Healthy — 211 samples (21.1%)
+---
 
-## Tools & Technologies
+## 📊 Scientific & Data Mining Workflow
 
-| Tool | Purpose |
-|---|---|
-| **WEKA** | Feature selection (Information Gain), K-Means clustering, Apriori association rule mining |
-| **Python** | Data preprocessing, reshaping (wide-to-long), cluster export handling |
-| **Power BI** | Data modeling, DAX measures, interactive dashboard |
-| **Excel** | Initial data inspection |
-
-## Repository Structure
-
-```
-├── data/
-│   ├── leukemia_gene_expression.csv           # Raw dataset (1000 samples x 1000 genes)
-│   ├── leukemia_gene_expression_cleaned.csv   # Normalized dataset
-│   ├── leukemia_top20_genes.csv               # Top 20 genes (wide format, post feature selection)
-│   ├── leukemia_top20_genes_long.csv          # Unpivoted long format for Power BI
-│   └── cluster_assignments.csv                # Sample-to-cluster mapping (from WEKA K-Means)
-├── weka/
-│   └── cluster_visualization.arff             # WEKA clustering output
-├── dashboard/
-│   └── leukemia_dashboard.pbix                # Power BI dashboard file
-└── README.md
+```mermaid
+graph TD
+    A[Raw Gene Expression: 1000 Genes + Diagnosis] --> B[Min-Max Normalization to [0,1]]
+    B --> C[ANOVA F-Score Feature Ranking]
+    C --> D[Select Top 20 Genes]
+    B --> E[Unsupervised SimpleKMeans Clustering K=3]
+    E --> F[Interactive Permutation Alignments]
+    F --> G[Classification Accuracies]
 ```
 
-## Methodology
+### 1. Preprocessing & Normalization
+Eliminates scaling bias using **Min-Max scaling** on gene expression levels:
+$$X_{norm} = \frac{X - X_{min}}{X_{max} - X_{min}}$$
+This prevents extremely active gene probes from skewing distance evaluations.
 
-### 1. Data Preprocessing
-- Missing value analysis and validation
-- Normalization of gene expression values (0–1 scale)
-- Feature selection using **Information Gain Attribute Evaluator** in WEKA to reduce 1,000 genes down to the top 20 most informative genes for classifying AML / ALL / Healthy
+### 2. Feature Selection (ANOVA F-score)
+Computes the variance ratio to rank attributes by classification significance:
+$$F = \frac{\text{Variance between diagnosis classes}}{\text{Variance within diagnosis classes}}$$
+The top 20 features are selected to solve the *curse of dimensionality*.
 
-### 2. Data Reshaping (Python)
-- The top-20-genes dataset was reshaped from wide format (one column per gene) to long format (`Sample_ID, Diagnosis, Gene, Expression`) to support proper Power BI data modeling — enabling gene-level slicers, distribution charts, and heatmaps without needing 20 separate visuals.
+### 3. Unsupervised Clustering
+Partitions the 1000-gene normalized space into $K=3$ clusters. An interactive permuter resolves the arbitrary cluster-to-diagnosis associations, locating the optimal mapping of `cluster0 ➔ AML`, `cluster1 ➔ Healthy`, `cluster2 ➔ ALL` yielding **75.20% accuracy**.
 
-### 3. Exploratory Data Analysis
-- Diagnosis-wise sample distribution
-- Mean vs. median expression comparison across AML / ALL / Healthy
-- Identification of top differentially expressed genes (by expression range across diagnosis groups)
+---
 
-### 4. Data Mining (WEKA)
-- **K-Means Clustering (k=3, Euclidean distance):** Clustering was run independent of diagnosis labels to check whether natural groupings in the gene expression data align with known disease classes.
-  - Cluster 0: 457 samples (45.7%)
-  - Cluster 1: 94 samples (9.4%)
-  - Cluster 2: 449 samples (44.9%)
-  - Clusters showed partial alignment with actual diagnosis labels but did not achieve complete separation, suggesting the 20-gene subset captures meaningful but incomplete biological variation.
-- **Association Rule Mining (Apriori):** Discovered 203 frequent itemsets and 28 large 2-itemsets after discretization. No rules met the confidence threshold — indicating weak but observable gene co-occurrence patterns rather than strong deterministic rules.
-- **Outlier Detection:** Visualized via expression distribution spread per diagnosis group.
+## 🛠️ Installation & Setup
 
-### 5. Data Modeling (Power BI)
-A star schema was used:
-- **Fact table:** `leukemia_top20_genes` (long format — Sample_ID, Diagnosis, Gene, Expression)
-- **Dim_Diagnosis:** Diagnosis, SortOrder, ColorHex
-- **Dim_Gene:** unique gene list
-- **cluster_assignments:** Sample_ID, Cluster (joined 1:many to fact table)
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/PremB2907/BioInsight.git
+   cd BioInsight
+   ```
 
-**Key DAX measures:**
-```DAX
-Avg Expression = AVERAGE(leukemia_top20_genes[Expression])
-Median Expression = MEDIAN(leukemia_top20_genes[Expression])
-Sample Count = DISTINCTCOUNT(leukemia_top20_genes[Sample_ID])
+2. **Install Dependencies**:
+   Ensure you have Python 3.10+ installed. Install dependencies using:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the Server**:
+   Launch the Flask server:
+   ```bash
+   python app.py
+   ```
+
+4. **Access the Portal**:
+   Open your browser and navigate to:
+   👉 **http://localhost:5000**
+
+---
+
+## 📁 Repository Structure
+
 ```
-
-## Dashboard Pages
-
-| Page | Contents |
-|---|---|
-| **Executive Overview** | KPI cards (Total Samples, AML/ALL/Healthy counts), Diagnosis distribution donut, Mean vs Median expression chart, Top differentially expressed genes |
-| **Gene Analysis** | Expression trend by diagnosis, Gene × Diagnosis heatmap matrix, interactive gene slicer, feature selection methodology notes |
-| **Cluster Analysis** | Sample-level scatter plot colored by cluster, cluster size distribution, K-Means methodology notes |
-| **Summary** | Key findings across dataset, gene analysis, clustering, and association rule mining, with recommendations |
-
-## Key Findings
-
-- Average and median expression values were closely aligned across all three diagnosis groups, indicating fairly symmetric distributions within the 20-gene panel.
-- Genes with the largest expression range across diagnosis groups (strongest candidates for differentiation): **Gene_244, Gene_521, Gene_366, Gene_646, Gene_149**.
-- K-Means clustering (k=3) partially aligned with actual diagnosis labels but did not fully separate the three classes — suggesting this 20-gene subset alone provides moderate, not complete, natural separation.
-- Apriori association rule mining found frequent gene co-occurrence patterns but no rules strong enough to meet standard confidence thresholds.
-
-## Limitations
-
-- Analysis is restricted to the top 20 genes selected via Information Gain; the full 1,000-gene feature space was not clustered or mined directly.
-- No hard performance benchmarks (e.g., precision/recall against known biomarkers) were available for cross-validation within the scope of this dataset.
-- Dataset is Kaggle-sourced and should be treated as exploratory rather than clinically validated.
-
-## Recommendations / Future Work
-
-1. Validate top differentiator genes against known leukemia biomarker literature.
-2. Re-run clustering on the full 1,000-gene feature set for stronger class separation.
-3. Cross-validate K-Means clusters against Diagnosis labels using a confusion-matrix comparison.
-4. Explore supervised classification models (e.g., Random Forest, SVM) as a complementary approach to unsupervised clustering.
-5. Extend association rule mining with lower confidence thresholds to surface weaker but potentially informative patterns.
-
-## How to Use
-
-1. Clone this repository.
-2. Open `dashboard/leukemia_dashboard.pbix` in Power BI Desktop.
-3. Data source paths may need to be updated under **Transform Data → Data Source Settings** if CSVs are moved.
-4. Use the gene slicer and page navigation buttons to explore each analysis page.
-
-## Author
-
-Prem Baraskar
+├── app.py                     # Flask server exposing REST JSON APIs
+├── processing.py              # Data cleaning, ANOVA selection, and KMeans logic
+├── requirements.txt           # Python library dependencies
+├── templates/
+│   └── index.html             # Cyper-aesthetic single page UI, styles, and Chart.js code
+├── DMBI SLA.pbix              # Underlying Power BI dashboard structure
+├── cluster_assignments.csv     # Precalculated WEKA SimpleKMeans clusters
+├── leukemia_top20_genes.csv   # Long-format ranked gene expression CSV
+└── leukemia_gene_expression_cleaned.csv  # Min-Max normalized full cohort
+```
