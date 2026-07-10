@@ -18,12 +18,12 @@ An interactive, high-fidelity web application built with **Flask + Vanilla HTML/
 
 ```mermaid
 graph TD
-    A[Raw Gene Expression: 1000 Genes + Diagnosis] --> B[Min-Max Normalization to [0,1]]
-    B --> C[ANOVA F-Score Feature Ranking]
-    C --> D[Select Top 20 Genes]
-    B --> E[Unsupervised SimpleKMeans Clustering K=3]
-    E --> F[Interactive Permutation Alignments]
-    F --> G[Classification Accuracies]
+    A["Raw Gene Expression: 1000 Genes + Diagnosis"] --> B["Min-Max Normalization to [0,1]"]
+    B --> C["ANOVA F-Score Feature Ranking"]
+    C --> D["Select Top 20 Genes"]
+    B --> E["Unsupervised SimpleKMeans Clustering K=3"]
+    E --> F["Interactive Permutation Alignments"]
+    F --> G["Classification Accuracies"]
 ```
 
 ### 1. Preprocessing & Normalization
